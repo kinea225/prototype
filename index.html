@@ -1,0 +1,864 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>드론비행규제가이드 · 프로토타입</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+:root{
+  --sky:#0284C7; --sky-50:#F0F9FF; --sky-100:#E0F2FE;
+  --navy:#0F172A; --navy2:#1E293B;
+  --green:#10B981; --green-d:#059669; --green-50:#ECFDF5;
+  --amber:#F59E0B; --amber-d:#B45309; --amber-50:#FFFBEB;
+  --red:#EF4444; --red-d:#DC2626; --red-50:#FEF2F2;
+  --bg:#F8FAFC; --white:#fff; --border:#E2E8F0; --muted:#64748B; --text:#1E293B;
+  --r:14px; --shadow:0 1px 2px rgba(15,23,42,.06),0 1px 3px rgba(15,23,42,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;word-break:keep-all;-webkit-font-smoothing:antialiased}
+a{color:var(--sky);text-decoration:none}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+h1,h2,h3{margin:0;color:var(--navy);line-height:1.3}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 16px 120px}
+.muted{color:var(--muted)} .cap{font-size:12.5px;color:var(--muted)}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grid{display:grid;gap:16px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:20px}
+@media(min-width:900px){.card{padding:24px}}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--border);background:var(--white);color:var(--navy2);font-weight:600;font-size:14.5px;transition:.15s}
+.btn:hover{background:#F1F5F9}
+.btn.primary{background:var(--sky);border-color:var(--sky);color:#fff}
+.btn.primary:hover{background:#0369A1}
+.btn.dark{background:var(--navy);border-color:var(--navy);color:#fff}
+.btn.ghost{border-color:transparent;background:transparent}
+.btn.sm{min-height:36px;padding:0 12px;font-size:13px;border-radius:10px}
+.btn.lg{min-height:56px;font-size:17px;padding:0 28px;border-radius:14px}
+.btn.block{width:100%}
+.btn.danger{color:var(--red-d)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.b-green{background:var(--green-50);color:var(--green-d);border:1px solid #A7F3D0}
+.b-amber{background:var(--amber-50);color:var(--amber-d);border:1px solid #FDE68A}
+.b-red{background:var(--red-50);color:var(--red-d);border:1px solid #FECACA}
+.b-blue{background:var(--sky-50);color:var(--sky);border:1px solid #BAE6FD}
+.b-gray{background:#F1F5F9;color:#475569;border:1px solid var(--border)}
+
+/* header */
+header.gnb{position:sticky;top:0;z-index:40;background:var(--navy);color:#fff}
+.gnb-in{max-width:1200px;margin:0 auto;height:60px;display:flex;align-items:center;gap:20px;padding:0 16px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:800;color:#fff;font-size:17px;white-space:nowrap}
+.logo-mark{width:30px;height:30px;border-radius:9px;background:var(--sky);display:grid;place-items:center}
+.nav{display:none;gap:4px;flex:1}
+.nav a{color:#CBD5E1;padding:8px 12px;border-radius:9px;font-weight:600;font-size:14.5px}
+.nav a.on,.nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.gnb-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.gnb-right .btn{min-height:36px;background:transparent;color:#E2E8F0;border-color:rgba(255,255,255,.2);font-size:13.5px}
+@media(min-width:900px){.nav{display:flex}}
+@media(max-width:899px){.gnb-right [data-act=logout]{display:none}.gnb-right .btn{white-space:nowrap}.hero .btn.lg{width:100%;font-size:15.5px;min-height:52px;padding:0 14px}}
+
+/* bottom nav (mobile) */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:45;background:#fff;border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 10px;font-size:11.5px;color:var(--muted);font-weight:600}
+.tabbar a svg{width:22px;height:22px}
+.tabbar a.on{color:var(--sky)}
+@media(min-width:900px){.tabbar{display:none}.wrap{padding-bottom:60px}}
+
+/* hero */
+.hero{background:linear-gradient(135deg,#0F172A 0%,#0C4A6E 60%,#0284C7 100%);color:#fff;border-radius:20px;padding:32px 20px;position:relative;overflow:hidden}
+.hero h1{color:#fff;font-size:28px;letter-spacing:-.02em}
+.hero p{color:#BAE6FD;margin:10px 0 22px}
+@media(min-width:900px){.hero{padding:48px 44px}.hero h1{font-size:38px}}
+.hero-deco{position:absolute;right:-40px;top:-30px;opacity:.12;width:320px}
+.search{display:flex;gap:8px;background:#fff;border-radius:14px;padding:6px;max-width:620px}
+.search input{flex:1;border:0;outline:0;padding:0 10px;min-width:0;color:var(--text)}
+.field{width:100%;min-height:46px;border:1px solid var(--border);border-radius:12px;padding:0 14px;background:#fff;color:var(--text);outline:none}
+.field:focus{border-color:var(--sky);box-shadow:0 0 0 3px var(--sky-100)}
+label.lbl{display:block;font-weight:600;font-size:13.5px;margin:0 0 6px;color:var(--navy2)}
+
+/* weather */
+.wx{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:900px){.wx{grid-template-columns:repeat(5,1fr)}}
+.wx-item{background:var(--bg);border-radius:12px;padding:12px 14px}
+.wx-item b{display:block;font-size:19px;color:var(--navy)}
+
+/* wizard */
+.progress{display:flex;gap:8px;margin:6px 0 22px}
+.progress .st{flex:1}
+.progress .bar{height:6px;border-radius:9px;background:var(--border)}
+.progress .st.on .bar{background:var(--sky)}
+.progress .st span{font-size:12.5px;font-weight:600;color:var(--muted)}
+.progress .st.on span{color:var(--sky)}
+.opts{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:640px){.opts.c2{grid-template-columns:1fr 1fr}.opts.c3{grid-template-columns:repeat(3,1fr)}}
+.opt{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;background:#fff;text-align:left;display:flex;gap:12px;align-items:flex-start;width:100%}
+.opt:hover{border-color:#94A3B8}
+.opt.on{border-color:var(--sky);background:var(--sky-50);box-shadow:0 0 0 3px var(--sky-100)}
+.opt .dot{width:18px;height:18px;border-radius:50%;border:2px solid #CBD5E1;flex:none;margin-top:2px}
+.opt.on .dot{border:5px solid var(--sky)}
+.opt b{display:block;color:var(--navy)}
+.opt small{color:var(--muted)}
+.toggle{display:inline-flex;background:#F1F5F9;border-radius:12px;padding:4px}
+.toggle button{border:0;background:transparent;padding:8px 16px;border-radius:9px;font-weight:600;color:var(--muted);min-height:38px}
+.toggle button.on{background:#fff;color:var(--sky);box-shadow:var(--shadow)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--border);background:#fff;border-radius:999px;padding:6px 14px;font-size:13.5px;font-weight:600;color:var(--navy2);min-height:36px}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.sec-t{font-size:17px;font-weight:700;margin:0 0 4px}
+.err{background:var(--red-50);color:var(--red-d);padding:10px 14px;border-radius:10px;font-size:13.5px;margin-top:8px}
+.notice-empty{background:var(--sky-50);border:1px dashed #7DD3FC;border-radius:12px;padding:14px;font-size:14px}
+
+/* map */
+.map{position:relative;background:#EEF2EA;border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.map svg{display:block;width:100%;height:100%;cursor:crosshair}
+.map .zone{cursor:pointer;transition:opacity .15s}
+.map .zone:hover{opacity:.8}
+.map-chips{position:absolute;top:10px;left:10px;right:10px;display:flex;gap:6px;flex-wrap:wrap;z-index:2}
+.map-chips .chip{box-shadow:var(--shadow);font-size:12.5px;min-height:32px;padding:4px 11px}
+.map-chips .chip.off{opacity:.55;text-decoration:line-through}
+.legend{position:absolute;right:10px;bottom:10px;background:rgba(255,255,255,.95);border-radius:10px;padding:8px 10px;font-size:11.5px;box-shadow:var(--shadow);z-index:2}
+.legend i{display:inline-block;width:14px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.zoom{position:absolute;left:10px;bottom:10px;display:flex;flex-direction:column;z-index:2;box-shadow:var(--shadow);border-radius:10px;overflow:hidden}
+.zoom button{width:34px;height:34px;border:0;background:#fff;font-weight:700;border-bottom:1px solid var(--border)}
+.popup{position:absolute;z-index:3;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(15,23,42,.18);padding:12px 14px;font-size:13px;min-width:210px;transform:translate(-50%,calc(-100% - 12px))}
+.popup b{font-size:14px;color:var(--navy)}
+.popup .x{position:absolute;right:6px;top:4px;border:0;background:none;color:var(--muted);font-size:16px}
+.map-loading{position:absolute;inset:0;background:rgba(248,250,252,.7);display:grid;place-items:center;z-index:4;font-weight:600;color:var(--sky);font-size:14px}
+.pbar{position:absolute;top:0;left:0;height:3px;background:var(--sky);animation:load 1s ease forwards;z-index:5}
+@keyframes load{from{width:0}to{width:100%}}
+
+/* result */
+.split{display:grid;gap:16px}
+@media(min-width:1024px){.split{grid-template-columns:3fr 2fr;align-items:start}.split .map{position:sticky;top:76px;height:calc(100vh - 100px)}}
+.res-map{height:48vh;min-height:300px}
+.status{border-radius:var(--r);padding:18px 20px;color:#fff}
+.status.g{background:linear-gradient(135deg,#059669,#10B981)}
+.status.a{background:linear-gradient(135deg,#D97706,#F59E0B)}
+.status.r{background:linear-gradient(135deg,#B91C1C,#EF4444)}
+.status h2{color:#fff;font-size:21px;margin:4px 0}
+.status .meta{font-size:13px;opacity:.92}
+.rc{display:flex;gap:12px;padding:14px 0;border-top:1px solid var(--border)}
+.rc:first-child{border-top:0;padding-top:0}
+.rc .ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;flex:none;font-weight:800}
+.ic.g{background:var(--green-50);color:var(--green-d)}
+.ic.a{background:var(--amber-50);color:var(--amber-d)}
+.ic.r{background:var(--red-50);color:var(--red-d)}
+.rc h3{font-size:15.5px;margin-bottom:2px}
+.rc ul{margin:4px 0 0;padding-left:18px;font-size:14px;color:#334155}
+.check{display:flex;gap:10px;align-items:flex-start;padding:8px 0;font-size:14px;cursor:pointer}
+.check input{width:18px;height:18px;margin-top:2px;accent-color:var(--sky)}
+.apps{display:grid;gap:8px}
+.app-link{display:flex;justify-content:space-between;align-items:center;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff;font-weight:600;color:var(--navy2);width:100%;text-align:left}
+.app-link:hover{border-color:var(--sky);color:var(--sky)}
+
+/* overlay / modal */
+.overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);z-index:60;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:18px;max-width:520px;width:100%;max-height:90vh;overflow:auto;padding:24px}
+.modal.wide{max-width:880px;background:#E2E8F0;padding:16px}
+.spinner{width:42px;height:42px;border:4px solid var(--sky-100);border-top-color:var(--sky);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* A4 report */
+.a4{background:#fff;width:100%;max-width:794px;aspect-ratio:210/297;margin:0 auto;padding:44px 48px;font-size:12.5px;color:#111;box-shadow:0 4px 18px rgba(0,0,0,.12);overflow:hidden}
+.a4 h1{text-align:center;font-size:21px;border-top:3px double #111;border-bottom:3px double #111;padding:12px 0;margin:14px 0 18px;color:#111}
+.a4 h4{margin:18px 0 8px;font-size:14px}
+.a4 table{width:100%;border-collapse:collapse}
+.a4 td{border:1px solid #94A3B8;padding:6px 8px}
+.a4 td.k{background:#F1F5F9;font-weight:600;width:18%}
+.a4 .foot{border-top:1px solid #94A3B8;margin-top:22px;padding-top:10px;font-size:11px;color:#475569}
+@media(max-width:640px){.a4{padding:20px;font-size:10px;aspect-ratio:auto}}
+@media print{
+  body *{visibility:hidden}
+  #report,#report *{visibility:visible}
+  #report{position:fixed;left:0;top:0;width:210mm;height:297mm;box-shadow:none;max-width:none}
+  @page{size:A4;margin:0}
+}
+
+/* notices */
+.tabs{display:flex;gap:4px;background:#F1F5F9;padding:4px;border-radius:12px;width:max-content;max-width:100%}
+.tabs a{padding:8px 18px;border-radius:9px;font-weight:700;color:var(--muted);font-size:14.5px}
+.tabs a.on{background:#fff;color:var(--navy);box-shadow:var(--shadow)}
+.ntc{border:1px solid var(--border);border-radius:var(--r);background:#fff;overflow:hidden}
+.ntc-h{padding:16px 18px;cursor:pointer;display:block;width:100%;text-align:left;border:0;background:none}
+.ntc-h h3{font-size:16px;margin:6px 0 4px}
+.ntc-b{border-top:1px solid var(--border);padding:16px 18px;max-width:100%;overflow-x:auto;font-size:14.5px}
+.ntc-b table{border-collapse:collapse;min-width:420px;font-size:13.5px}
+.ntc-b td,.ntc-b th{border:1px solid var(--border);padding:6px 10px;text-align:left}
+.ntc-b th{background:var(--bg)}
+.lic{border:1.5px solid var(--border);border-radius:var(--r);background:#fff;padding:18px;position:relative}
+.lic.mine{border:2.5px solid var(--sky);box-shadow:0 0 0 4px var(--sky-100)}
+.lic h3{font-size:18px}
+.lic ul{padding-left:18px;margin:10px 0;font-size:14px}
+.lic-grid{display:grid;gap:12px;grid-template-columns:1fr}
+@media(min-width:640px){.lic-grid{grid-template-columns:1fr 1fr}}
+@media(min-width:1024px){.lic-grid{grid-template-columns:repeat(5,1fr)}}
+.steps{display:grid;gap:10px;grid-template-columns:1fr}
+@media(min-width:900px){.steps{grid-template-columns:repeat(4,1fr)}}
+.step-n{width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px;margin-bottom:6px}
+
+/* mypage */
+.drone{display:flex;flex-direction:column;gap:8px}
+.drone dl{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:6px 0;font-size:14px}
+.drone dt{color:var(--muted)}
+.drone dd{margin:0;font-weight:600}
+.hist{display:grid;gap:8px}
+.hist-row{display:grid;grid-template-columns:1fr;gap:6px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:12px 14px;background:#fff}
+@media(min-width:900px){.hist-row{grid-template-columns:100px 1.4fr 1fr 150px auto}}
+
+/* chatbot */
+.fab{position:fixed;right:18px;bottom:84px;z-index:50;width:58px;height:58px;border-radius:50%;border:0;background:var(--sky);color:#fff;box-shadow:0 8px 20px rgba(2,132,199,.4);display:grid;place-items:center}
+@media(min-width:900px){.fab{bottom:28px;right:28px}}
+.drawer{position:fixed;z-index:70;background:#fff;display:flex;flex-direction:column;inset:0;transform:translateX(100%);transition:transform .25s}
+@media(min-width:900px){.drawer{left:auto;width:420px;border-left:1px solid var(--border);box-shadow:-8px 0 30px rgba(15,23,42,.12)}}
+.drawer.open{transform:none}
+.dr-h{display:flex;align-items:center;gap:10px;padding:14px 16px;background:var(--navy);color:#fff}
+.dr-h b{flex:1}
+.dr-h button{background:none;border:0;color:#fff;font-size:20px}
+.dr-body{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.msg{max-width:88%;padding:10px 14px;border-radius:14px;font-size:14.5px;white-space:pre-wrap}
+.msg.ai{background:#fff;border:1px solid var(--border);align-self:flex-start;border-top-left-radius:4px}
+.msg.me{background:var(--sky);color:#fff;align-self:flex-end;border-top-right-radius:4px}
+.src{margin-top:10px;border:1px solid var(--border);border-radius:10px;background:var(--bg);font-size:13px;white-space:normal}
+.src summary{padding:8px 10px;cursor:pointer;font-weight:700;color:var(--navy2)}
+.src div{padding:0 10px 10px}
+.src q{display:block;color:#475569;margin:4px 0 8px;font-style:normal;border-left:3px solid var(--sky);padding-left:8px}
+.typing span{display:inline-block;width:7px;height:7px;border-radius:50%;background:#94A3B8;margin:0 2px;animation:bounce 1s infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)}}
+.dr-f{display:flex;gap:8px;padding:12px;border-top:1px solid var(--border);background:#fff}
+
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 18px;border-radius:12px;z-index:90;font-size:14px;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:90vw}
+footer{border-top:1px solid var(--border);margin-top:40px;padding:20px 0;font-size:12.5px;color:var(--muted)}
+.proto-tag{position:fixed;left:12px;bottom:12px;z-index:30;font-size:11px;background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;border-radius:8px;padding:2px 8px;font-weight:700}
+@media(max-width:899px){.proto-tag{display:none}}
+</style>
+</head>
+<body>
+
+<header class="gnb">
+  <div class="gnb-in">
+    <a class="logo" href="#/home"><span class="logo-mark"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="5" cy="5" r="2.5"/><circle cx="19" cy="5" r="2.5"/><circle cx="5" cy="19" r="2.5"/><circle cx="19" cy="19" r="2.5"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg></span>드론비행규제가이드</a>
+    <nav class="nav" id="nav"></nav>
+    <div class="gnb-right" id="gnbRight"></div>
+  </div>
+</header>
+<div class="proto-tag">PROTOTYPE · 목 데이터</div>
+
+<main id="app"></main>
+
+<nav class="tabbar" id="tabbar"></nav>
+
+<button class="fab" data-act="chat-open" aria-label="AI 법령 챗봇 열기">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.4A8 8 0 1 1 21 12z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01" stroke-width="3" stroke-linecap="round"/></svg>
+</button>
+
+<aside class="drawer" id="drawer" aria-label="AI 법령 질의응답 챗봇">
+  <div class="dr-h"><span>🤖</span><b>AI 항공안전법·드론 규제 상담</b><button data-act="chat-close" aria-label="닫기">×</button></div>
+  <div class="dr-body" id="chatBody"></div>
+  <form class="dr-f" id="chatForm">
+    <input class="field" id="chatInput" placeholder="궁금한 드론 법령/규제를 입력하세요..." autocomplete="off">
+    <button class="btn primary" type="submit">전송</button>
+  </form>
+</aside>
+
+<div id="layer"></div>
+
+<script>
+/* ============================================================
+   MOCK DATA
+   ============================================================ */
+const WC = [
+  {label:'250g 이하', sub:'자격·기체신고 면제', lic:'면제', licDesc:'자격 불필요', reg:'면제', max:0.25},
+  {label:'250g 초과 ~ 2kg', sub:'4종 자격 대상', lic:'4종', licDesc:'온라인 무료 교육 이수', reg:'면제 (영리 목적 시 신고 필수)', max:2},
+  {label:'2kg 초과 ~ 7kg', sub:'3종 자격 + 신고 필수', lic:'3종', licDesc:'필기 + 비행경력 6시간', reg:'신고 필수', max:7},
+  {label:'7kg 초과 ~ 25kg', sub:'2종 자격 + 신고 필수', lic:'2종', licDesc:'필기 + 비행경력 10시간 + 실기', reg:'신고 필수', max:25},
+  {label:'25kg 초과 ~ 150kg', sub:'1종 + 안전성인증 필수', lic:'1종', licDesc:'필기 + 비행경력 20시간 + 실기', reg:'신고 + 안전성인증 필수', max:150},
+];
+const wcOf = kg => Math.max(0, WC.findIndex(w => kg <= w.max));
+
+// 공역 폴리곤 (SVG 좌표계 0~1000 x 0~640 · PostGIS airspace_zones 목업)
+const ZONES = [
+  {id:'ctr', code:'RKSS-CTR', name:'김포국제공항 관제권', type:'CONTROL', shape:'circle', cx:190, cy:250, r:150, alt:'GND ~ 3,000ft', auth:'서울지방항공청'},
+  {id:'r75', code:'R-75', name:'서울 비행제한구역', type:'RESTRICTED', shape:'poly', pts:[[330,120],[820,110],[880,330],[790,520],[360,540],[300,330]], alt:'GND ~ UNL', auth:'수도방위사령부'},
+  {id:'p73', code:'P-73A', name:'서울 도심 비행금지구역', type:'PROHIBITED', shape:'circle', cx:600, cy:330, r:55, alt:'GND ~ UNL', auth:'수도방위사령부'},
+];
+const ZSTYLE = {
+  PROHIBITED:{fill:'rgba(239,68,68,.35)', stroke:'#DC2626', w:2.5, dash:'', label:'비행금지', badge:'b-red', icon:'🚫'},
+  RESTRICTED:{fill:'rgba(245,158,11,.28)', stroke:'#D97706', w:2, dash:'6 4', label:'비행제한', badge:'b-amber', icon:'⚠'},
+  CONTROL:{fill:'rgba(2,132,199,.22)', stroke:'#0284C7', w:2, dash:'', label:'관제권', badge:'b-blue', icon:'✈'},
+};
+const PLACES = [
+  {name:'여의도 한강공원', addr:'서울 영등포구 여의동로 330', x:450, y:400},
+  {name:'용산구 이촌동', addr:'서울 용산구 이촌동 302', x:590, y:375},
+  {name:'강서구 마곡동', addr:'서울 강서구 마곡중앙로 161', x:230, y:300},
+  {name:'하남 미사 조정경기장', addr:'경기 하남시 미사대로 505', x:940, y:430},
+];
+
+const S = {
+  user:{name:'김태홍', email:'22260020@yc.ac.kr'},
+  drones:[
+    {id:'d1', name:'나의 메인 촬영드론', model:'DJI Mavic 3 Classic', empty:0.895, mtow:0.895, camera:true, reg:''},
+    {id:'d2', name:'농업방제 교육용 기체', model:'EFT E616P', empty:14, mtow:31, camera:false, reg:'S-26-03914'},
+  ],
+  history:[],
+  wiz:null, result:null,
+  layers:{PROHIBITED:true, RESTRICTED:true, CONTROL:true},
+  mapPin:null, popup:null, ntcOpen:0, ntcCat:'전체', ntcQ:'', histFilter:'ALL',
+};
+function newWiz(over={}){
+  return Object.assign({step:1, droneId:null, wc:1, camera:true, purpose:'hobby', place:{...PLACES[0]}, radius:300, alt:'low', time:'day', sight:'vlos', q:'', qErr:''}, over);
+}
+S.wiz = newWiz();
+
+const NOTICES = [
+  {cat:'공역고시', title:'2026년 하반기 비행금지구역 및 관제권 경계 일부 변경 안내', org:'국토교통부', date:'2026.10.10', views:342,
+   body:`<p>• 적용 일시: 2026년 11월 1일 00:00부<br>• 주요 내용: 김포국제공항 관제권 북측 섹터 좌표 일부 조정</p>
+   <table><tr><th>구역</th><th>변경 전</th><th>변경 후</th><th>비고</th></tr><tr><td>RKSS-CTR 북측</td><td>반경 9.3km</td><td>북측 0.5km 확장</td><td>고시 제2026-xxx호</td></tr><tr><td>R-75</td><td>변경 없음</td><td>변경 없음</td><td>-</td></tr></table>
+   <p class="cap">원본의 고정폭(800px) 표를 반응형 스크롤 표로 변환해 표시합니다.</p>`},
+  {cat:'단속', title:'가을철 산림 인접지역 드론 비행 특별단속 안내', org:'국토교통부 항공안전정책과', date:'2026.10.08', views:518,
+   body:`<p>산불 조심 기간(11.1~12.15) 동안 산림 인접 지역의 무허가 비행을 집중 단속합니다.</p><p>• 위반 시 항공안전법에 따라 최대 300만원 이하 과태료<br>• 비행 전 반드시 공역 및 승인 여부를 확인하세요.</p>`},
+  {cat:'법령개정', title:'초경량비행장치 조종자 증명 4종 온라인 교육 개편 안내', org:'한국교통안전공단', date:'2026.09.29', views:1204,
+   body:`<p>4종 온라인 교육 과정이 개편되어 이수 시간이 일부 조정됩니다.</p><p>• 시행일: 2026.10.15<br>• 기존 이수자는 재이수 불필요</p>`},
+  {cat:'일반', title:'드론원스톱 민원서비스 정기 점검 안내 (10/25 02:00~06:00)', org:'드론원스톱', date:'2026.09.20', views:211,
+   body:`<p>시스템 정기 점검으로 해당 시간 동안 민원 신청이 일시 중단됩니다.</p>`},
+];
+
+/* ============================================================
+   GEO + DIAGNOSIS ENGINE (FR-12 ~ FR-15 목업)
+   ============================================================ */
+function inPoly(x,y,pts){let c=false;for(let i=0,j=pts.length-1;i<pts.length;j=i++){const[xi,yi]=pts[i],[xj,yj]=pts[j];if((yi>y)!==(yj>y)&&x<(xj-xi)*(y-yi)/(yj-yi)+xi)c=!c}return c}
+function zonesAt(x,y){return ZONES.filter(z=>z.shape==='circle'?Math.hypot(x-z.cx,y-z.cy)<=z.r:inPoly(x,y,z.pts))}
+
+function diagnose(w){
+  const wc=WC[w.wc], zs=zonesAt(w.place.x,w.place.y);
+  const P=zs.find(z=>z.type==='PROHIBITED'), R=zs.find(z=>z.type==='RESTRICTED'), C=zs.find(z=>z.type==='CONTROL');
+  const cards=[], docs=[], apps=[];
+  const addDoc=d=>{if(!docs.includes(d))docs.push(d)};
+  // 1. 공역/비행승인
+  if(P){cards.push({lv:2,t:'공역 및 비행승인',h:'비행금지구역 — 비행승인 필수',l:[`해당 구역: ${P.code} ${P.name}`,`관할: ${P.auth}`,'원칙적 금지 · 예외적 승인 시에만 비행 가능']});}
+  else if(R||C||w.alt==='high'){
+    const z=R||C; const l=[];
+    if(z) l.push(`해당 구역: ${z.code} ${z.name}`,`관할: ${z.auth}`);
+    if(w.alt==='high') l.push('고도 150m 이상 비행 → 고도 비행승인 대상');
+    cards.push({lv:1,t:'공역 및 비행승인',h:'[필수] 비행승인 신청',l});
+  } else cards.push({lv:0,t:'공역 및 비행승인',h:'일반 구역 · 별도 비행승인 불필요',l:['비관제공역, 150m 미만 주간 비행','안전수칙(사람 밀집지역 상공 금지 등) 준수']});
+  if(P||R||C||w.alt==='high'){addDoc('초경량비행장치 비행승인 신청서');addDoc('비행계획서');apps.push({n:'비행승인 신청',path:'flight-approval'});}
+  // 2. 야간/비가시
+  if(w.time==='night'||w.sight==='bvlos'){
+    cards.push({lv:2,t:'비행 시간·방식',h:'[필수] 특별비행승인',l:[w.time==='night'?'야간 비행 (일몰 후 ~ 일출 전)':'',w.sight==='bvlos'?'가시권 밖 비행 (BVLOS)':'','안전성인증서 및 비행절차서 첨부 필요'].filter(Boolean)});
+    addDoc('특별비행승인 신청서');addDoc('안전성인증서');addDoc('비행절차서(매뉴얼)');apps.push({n:'특별비행승인 신청',path:'special-flight'});
+  } else cards.push({lv:0,t:'비행 시간·방식',h:'주간 · 가시권 내 비행',l:['특별비행승인 불필요']});
+  // 3. 항공촬영
+  if(w.camera){cards.push({lv:1,t:'항공촬영 허가',h:'[필수] 국방부 항공촬영 허가',l:['카메라 탑재 비행','비행 4~7일 전 신청 권장 (관할 군부대 승인)']});addDoc('항공촬영 허가 신청서');apps.push({n:'항공촬영 허가 신청',path:'aerial-photo'});}
+  else cards.push({lv:0,t:'항공촬영 허가',h:'해당 없음 (카메라 미탑재)',l:[]});
+  // 4. 기체신고/자격
+  const needReg = w.wc>=2 || (w.wc===1 && w.purpose==='biz');
+  cards.push({lv:0,t:'기체신고 및 조종자격',h:`자격: ${wc.lic}${wc.lic!=='면제'?' ('+wc.licDesc+')':''}`,l:[`최대이륙중량 구간: ${wc.label}`,`기체신고: ${needReg?(w.wc===4?'신고 + 안전성인증 필수':'신고 필수'):'면제'}`],info:true});
+  if(needReg){addDoc('초경량비행장치 신고서');apps.push({n:'기체 신고',path:'registration'});}
+  if(w.wc===4){addDoc('안전성인증서');}
+  if(w.wc>=1)addDoc('조종자격 증명서 (한국교통안전공단 발급)');
+  // 5. 사업
+  if(w.purpose==='biz'){cards.push({lv:1,t:'사용사업 등록',h:'[필수] 초경량비행장치사용사업 등록',l:['영리 목적 비행 (상업 촬영·방제·측량 등)','영업배상책임보험 가입 필요']});addDoc('초경량비행장치사용사업 등록증');addDoc('영업배상책임보험 가입 증명서');}
+  if(docs.length && (P||R||C||w.camera||w.time==='night'||w.sight==='bvlos'))addDoc('드론 기체 제원표 및 기체 사진');
+  const level=Math.max(...cards.map(c=>c.lv));
+  return {level, cards, docs, apps, zones:zs, input:JSON.parse(JSON.stringify(w)), at:new Date(), no:'DOC-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(Math.floor(Math.random()*9000)+1000)};
+}
+const LV = [
+  {k:'GREEN', c:'g', b:'b-green', icon:'✓', t:'즉시 비행 가능', d:'별도 승인 불요'},
+  {k:'AMBER', c:'a', b:'b-amber', icon:'⚠', t:'사전 승인 필요', d:'조건부 비행 가능'},
+  {k:'RED',   c:'r', b:'b-red',   icon:'🚫', t:'특별승인 필수 / 비행금지', d:'승인 없이 비행 불가'},
+];
+
+// seed history
+(function(){
+  const seeds=[
+    {d:'2026-10-14T16:50', o:{droneId:'d1',wc:1,camera:true,purpose:'hobby',place:{...PLACES[0]}}},
+    {d:'2026-10-02T10:12', o:{droneId:'d1',wc:1,camera:false,purpose:'hobby',place:{...PLACES[3]}}},
+    {d:'2026-09-19T21:30', o:{droneId:null,wc:0,camera:true,purpose:'hobby',time:'night',place:{...PLACES[1]}}},
+  ];
+  seeds.forEach(s=>{const r=diagnose(newWiz(s.o));r.at=new Date(s.d);S.history.push(r)});
+})();
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+const $=s=>document.querySelector(s);
+const fmtD=d=>`${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+const fmtDT=d=>fmtD(d)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+const kg=v=>v<1?Math.round(v*1000)+'g':(+v).toFixed(v%1?1:0)+'kg';
+function toast(m){const t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);setTimeout(()=>t.remove(),2400)}
+function droneById(id){return S.drones.find(d=>d.id===id)}
+function wizSummary(w){const d=droneById(w.droneId);return `${d?d.model+' · ':''}${WC[w.wc].label} · ${w.camera?'카메라 탑재':'미탑재'} · ${w.purpose==='biz'?'영리':'취미/레저'}`}
+
+/* ============================================================
+   MAP (SVG mock of Kakao Maps / OpenLayers)
+   ============================================================ */
+function mapSVG({pin, radius=300, showLabels=true}={}){
+  const z=ZONES.filter(z=>S.layers[z.type]).sort((a,b)=>({CONTROL:15,RESTRICTED:20,PROHIBITED:30}[a.type]-{CONTROL:15,RESTRICTED:20,PROHIBITED:30}[b.type]));
+  const shapes=z.map(z=>{const s=ZSTYLE[z.type];const a=`class="zone" data-zone="${z.id}" fill="${s.fill}" stroke="${s.stroke}" stroke-width="${s.w}" ${s.dash?`stroke-dasharray="${s.dash}"`:''}`;
+    return z.shape==='circle'?`<circle cx="${z.cx}" cy="${z.cy}" r="${z.r}" ${a}/>`:`<polygon points="${z.pts.map(p=>p.join(',')).join(' ')}" ${a}/>`}).join('');
+  const zl=showLabels?z.map(z=>{const [x,y]=z.shape==='circle'?[z.cx,z.cy-(z.type==='PROHIBITED'?0:z.r-24)]:[560,150];return `<text x="${x}" y="${y}" text-anchor="middle" font-size="15" font-weight="800" fill="${ZSTYLE[z.type].stroke}" pointer-events="none">${z.code}</text>`}).join(''):'';
+  const places=PLACES.map(p=>`<g pointer-events="none"><circle cx="${p.x}" cy="${p.y}" r="3.5" fill="#64748B"/><text x="${p.x+7}" y="${p.y+16}" font-size="12" fill="#475569">${p.name}</text></g>`).join('');
+  const pinG=pin?`<g pointer-events="none"><circle cx="${pin.x}" cy="${pin.y}" r="${Math.max(10,radius/20)}" fill="rgba(16,185,129,.25)" stroke="#059669" stroke-width="2"/>
+    <path d="M${pin.x} ${pin.y} l-11 -22 a12.5 12.5 0 1 1 22 0 z" fill="#0F172A"/><circle cx="${pin.x}" cy="${pin.y-27}" r="5" fill="#fff"/></g>`:'';
+  return `<svg viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid slice" data-map>
+    <rect width="1000" height="640" fill="#EEF2EA"/>
+    <g fill="#E3EADC"><rect x="40" y="40" width="160" height="110" rx="10"/><rect x="700" y="480" width="200" height="120" rx="10"/><rect x="420" y="40" width="140" height="60" rx="10"/></g>
+    <g stroke="#fff" stroke-width="7" fill="none"><path d="M0 180 L1000 150"/><path d="M0 560 L1000 600"/><path d="M380 0 L330 640"/><path d="M720 0 L760 640"/><path d="M0 320 Q500 260 1000 300"/></g>
+    <path d="M0,430 C150,380 260,470 400,410 S640,330 790,390 S940,460 1000,420" stroke="#BFDBFE" stroke-width="30" fill="none"/>
+    <text x="300" y="456" font-size="13" fill="#60A5FA" font-weight="700">한강</text>
+    <g transform="translate(180 250)" pointer-events="none"><rect x="-26" y="-6" width="52" height="12" rx="3" fill="#CBD5E1"/><text y="28" text-anchor="middle" font-size="12" fill="#475569">김포공항</text></g>
+    ${shapes}${zl}${places}${pinG}
+  </svg>`;
+}
+function mapBlock({pin,radius,cls='',loading=false}){
+  const chip=(t,k)=>`<button class="chip ${k?(S.layers[k]?'':'off'):''}" data-act="layer" data-k="${k||'ALL'}">${k?ZSTYLE[k].icon+' ':''}${t}</button>`;
+  const pop=S.popup?(()=>{const z=ZONES.find(z=>z.id===S.popup.id);const s=ZSTYLE[z.type];return `<div class="popup" style="left:${S.popup.x/10}%;top:${S.popup.y/6.4}%"><button class="x" data-act="pop-close">×</button><span class="badge ${s.badge}">${s.icon} ${s.label}구역</span><div style="margin-top:6px"><b>${z.code}</b> ${z.name}</div><div class="cap">제한고도: ${z.alt}<br>관할기관: ${z.auth}</div></div>`})():'';
+  return `<div class="map ${cls}" id="mapBox">
+    ${loading?'<div class="pbar"></div>':''}
+    <div class="map-chips">${chip('전체')}${chip('비행금지','PROHIBITED')}${chip('비행제한','RESTRICTED')}${chip('관제권','CONTROL')}</div>
+    ${mapSVG({pin,radius})}${pop}
+    <div class="zoom"><button data-act="zoom">+</button><button data-act="zoom">−</button></div>
+    <div class="legend"><div><i style="background:rgba(239,68,68,.5);border:2px solid #DC2626"></i>비행금지 (실선)</div><div><i style="background:rgba(245,158,11,.4);border:2px dashed #D97706"></i>비행제한 (파선)</div><div><i style="background:rgba(2,132,199,.35);border:2px solid #0284C7"></i>관제권</div><div><i style="background:rgba(16,185,129,.35);border:2px solid #059669"></i>지정 비행반경</div></div>
+  </div>`;
+}
+function svgPoint(e){const svg=e.target.closest('svg[data-map]');const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;const p=pt.matrixTransform(svg.getScreenCTM().inverse());return {x:Math.round(p.x),y:Math.round(p.y)}}
+
+/* ============================================================
+   PAGES
+   ============================================================ */
+const ROUTES = {
+  home:Home, diagnosis:Diagnosis, result:Result, map:MapPage, notices:Notices, licenses:Notices, mypage:MyPage, login:Login
+};
+function route(){return (location.hash.replace('#/','')||'home').split('?')[0]}
+function render(){
+  const r=route(); const page=ROUTES[r]||Home;
+  $('#app').innerHTML=page();
+  const nav=[['diagnosis','규제진단'],['map','공역지도'],['notices','공지사항'],['licenses','자격증안내'],['mypage','마이페이지']];
+  const act=r==='result'?'diagnosis':r;
+  $('#nav').innerHTML=nav.map(([k,t])=>`<a href="#/${k}" class="${act===k?'on':''}">${t}</a>`).join('');
+  $('#gnbRight').innerHTML=S.user?`<a class="btn sm" href="#/mypage">${S.user.name} 님</a><button class="btn sm" data-act="logout">로그아웃</button>`:`<a class="btn sm" href="#/login">로그인 / 회원가입</a>`;
+  const ic={home:'<path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',diagnosis:'<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/>',map:'<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',notices:'<path d="M4 5h16v11H8l-4 4z"/>',mypage:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>'};
+  const tabs=[['home','홈'],['diagnosis','진단'],['map','지도'],['notices','공지/자격'],['mypage','마이']];
+  const tact=r==='licenses'?'notices':act;
+  $('#tabbar').innerHTML=tabs.map(([k,t])=>`<a href="#/${k}" class="${tact===k?'on':''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round">${ic[k]}</svg>${t}</a>`).join('');
+}
+
+/* ---------- HOME ---------- */
+function Home(){
+  const main=S.drones[0];
+  return `<div class="wrap">
+  <section class="hero">
+    <svg class="hero-deco" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1"><circle cx="5" cy="5" r="3"/><circle cx="19" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><path d="M7 7l3 3M17 7l-3 3M7 17l3-3M17 17l-3-3"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+    <span class="badge" style="background:rgba(255,255,255,.12);color:#E0F2FE">항공안전법 기반 자동 진단</span>
+    <h1 style="margin-top:12px">드론 비행 전 1분 진단으로<br>과태료 없는 안전 비행을 준비하세요</h1>
+    <p>비행 조건만 입력하면 필요한 승인·허가·서류와 드론원스톱 신청 경로까지 한 번에 안내합니다.</p>
+    <form class="search" data-form="quick">
+      <input name="q" placeholder="비행 예정 지역 검색: 예) 여의도 한강공원" aria-label="비행 예정 지역 검색">
+      <button class="btn dark sm" style="min-height:42px">빠른 공역확인</button>
+    </form>
+    <div class="row" style="margin-top:16px">
+      <a href="#/diagnosis" data-act="wiz-new" class="btn primary lg" style="background:#fff;color:var(--sky);border-color:#fff">★ 비행 조건 입력 및 규제 진단 시작하기</a>
+      <a href="#/map" class="btn lg ghost" style="color:#fff">공역 지도 조회 →</a>
+    </div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <div class="row between"><h2 class="sec-t">실시간 비행 기상 정보 <span class="cap">현재 위치 기준 · 기상청 단기예보(목업)</span></h2><span class="badge b-green">✓ 비행 적합</span></div>
+    <div class="wx" style="margin-top:12px">
+      <div class="wx-item"><span class="cap">풍속</span><b>2.1 m/s</b><span class="cap">양호</span></div>
+      <div class="wx-item"><span class="cap">강수확률</span><b>10%</b><span class="cap">맑음</span></div>
+      <div class="wx-item"><span class="cap">시정</span><b>15 km</b><span class="cap">매우 좋음</span></div>
+      <div class="wx-item"><span class="cap">일출</span><b>06:45</b><span class="cap">주간 비행 시작</span></div>
+      <div class="wx-item"><span class="cap">일몰</span><b>17:52</b><span class="cap">이후 야간비행 승인 필요</span></div>
+    </div>
+  </section>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:16px">
+    <section class="card">
+      <div class="row between"><h2 class="sec-t">최신 드론 공지사항</h2><a href="#/notices" class="cap">전체 보기 ›</a></div>
+      <div class="grid" style="gap:10px;margin-top:12px">
+        ${NOTICES.slice(0,3).map((n,i)=>`<a href="#/notices" data-act="ntc-go" data-i="${i}" style="display:block;border:1px solid var(--border);border-radius:12px;padding:12px 14px;color:inherit"><span class="badge b-gray">${n.cat}</span><div style="font-weight:700;margin-top:6px;color:var(--navy)">${n.title}</div><div class="cap">${n.date} · ${n.org}</div></a>`).join('')}
+      </div>
+    </section>
+    <section class="card">
+      <div class="row between"><h2 class="sec-t">조종자격 및 기체신고 기준</h2><a href="#/licenses" class="cap">상세 보기 ›</a></div>
+      <div style="margin-top:12px;display:grid;gap:8px">
+        ${WC.map((w,i)=>`<div class="row between" style="padding:10px 12px;border-radius:10px;background:${main&&wcOf(main.mtow)===i?'var(--sky-50)':'var(--bg)'};gap:6px"><span><b style="color:var(--navy)">${w.lic}</b> <span class="cap">${w.label}</span></span><span class="cap">${w.licDesc}</span></div>`).join('')}
+      </div>
+      ${main?`<p class="cap" style="margin:10px 0 0">💡 등록 기체 <b>${main.model} (${kg(main.mtow)})</b> 기준 필수 자격은 <b style="color:var(--sky)">${WC[wcOf(main.mtow)].lic}</b> 입니다.</p>`:''}
+    </section>
+  </div>
+  <footer>항공안전법 안내 · 드론원스톱 민원서비스 연계 · 연암공과대학교 0dev팀 — 본 화면은 목 데이터로 구성된 프로토타입입니다.</footer>
+  </div>`;
+}
+
+/* ---------- DIAGNOSIS WIZARD ---------- */
+function Diagnosis(){
+  const w=S.wiz;
+  const steps=['기체 정보','비행 목적','위치 / 환경'];
+  const prog=`<div class="progress">${steps.map((s,i)=>`<div class="st ${i<w.step?'on':''}"><div class="bar"></div><span>${i+1}. ${s}</span></div>`).join('')}</div>`;
+  let body='';
+  if(w.step===1){
+    body=`<h2 class="sec-t">진단 1단계 · 드론 기체 제원을 선택하세요</h2>
+    <p class="cap" style="margin:0 0 14px">등록된 내 드론을 불러오면 최대이륙중량·카메라 여부가 자동 입력됩니다.</p>
+    ${S.user&&S.drones.length?`<label class="lbl">📥 마이페이지 등록 기체 불러오기</label>
+      <div class="chips" style="margin-bottom:18px">${S.drones.map(d=>`<button class="chip ${w.droneId===d.id?'on':''}" data-act="wiz-drone" data-id="${d.id}">${d.model} (${kg(d.mtow)}${d.camera?', 카메라':''})</button>`).join('')}<button class="chip ${!w.droneId?'on':''}" data-act="wiz-drone" data-id="">직접 선택</button></div>`
+      :`<div class="notice-empty" style="margin-bottom:18px">아직 등록된 드론이 없습니다. 내 드론을 등록하면 매번 무게를 입력할 필요 없이 1초 만에 불러올 수 있습니다. <a href="#/mypage">[+ 첫 드론 등록하기]</a></div>`}
+    <label class="lbl">최대이륙중량(MTOW) 구간</label>
+    <div class="opts c3">${WC.map((c,i)=>`<button class="opt ${w.wc===i?'on':''}" data-act="wiz-set" data-k="wc" data-v="${i}"><span class="dot"></span><span><b>${c.label}</b><small>${c.sub}</small></span></button>`).join('')}</div>
+    <label class="lbl" style="margin-top:18px">카메라 탑재 여부 <span class="cap">— 국방부 항공촬영 허가 판별 기준</span></label>
+    <div class="toggle"><button class="${w.camera?'on':''}" data-act="wiz-set" data-k="camera" data-v="1">● 탑재 (촬영)</button><button class="${!w.camera?'on':''}" data-act="wiz-set" data-k="camera" data-v="0">미탑재</button></div>`;
+  } else if(w.step===2){
+    body=`<h2 class="sec-t">진단 2단계 · 비행 목적을 선택하세요</h2>
+    <p class="cap" style="margin:0 0 14px">영리 목적이면 초경량비행장치사용사업 등록이 필요합니다.</p>
+    <div class="opts c2">
+      <button class="opt ${w.purpose==='hobby'?'on':''}" data-act="wiz-set" data-k="purpose" data-v="hobby"><span class="dot"></span><span><b>비사업용 (취미 / 레저 / 연습)</b><small>개인 촬영, 여가 비행</small></span></button>
+      <button class="opt ${w.purpose==='biz'?'on':''}" data-act="wiz-set" data-k="purpose" data-v="biz"><span class="dot"></span><span><b>사업용 (영리 목적)</b><small>상업 촬영, 농업 방제, 측량 등 · 사용사업 등록 대상</small></span></button>
+    </div>`;
+  } else {
+    const zs=zonesAt(w.place.x,w.place.y);
+    body=`<h2 class="sec-t">진단 3단계 · 비행 위치 및 환경 조건</h2>
+    <form class="row" data-form="wiz-search" style="margin:12px 0 6px;flex-wrap:nowrap"><input class="field" name="q" value="${w.q}" placeholder="주소 또는 장소명 검색 (예: 여의도, 마곡, 미사)"><button class="btn">검색</button></form>
+    ${w.qErr?`<div class="err">${w.qErr}</div>`:''}
+    <div class="chips" style="margin:10px 0">${PLACES.map((p,i)=>`<button class="chip ${w.place.name===p.name?'on':''}" data-act="wiz-place" data-i="${i}">${p.name}</button>`).join('')}</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));align-items:start">
+      <div>
+        <div class="map" id="wizMap" style="height:260px">${mapSVG({pin:w.place,radius:w.radius,showLabels:true})}</div>
+        <p class="cap" style="margin:6px 0 0">📍 지도를 클릭해 핀을 직접 지정할 수 있습니다.</p>
+      </div>
+      <div class="grid" style="gap:14px">
+        <div><label class="lbl">비행 위치</label><div class="field" style="display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg)"><span><b>${w.place.name}</b> <span class="cap">${w.place.addr||''}</span></span></div>
+          <div class="row" style="margin-top:6px;gap:6px">${zs.length?zs.map(z=>`<span class="badge ${ZSTYLE[z.type].badge}">${ZSTYLE[z.type].icon} ${z.code}</span>`).join(''):'<span class="badge b-green">✓ 일반 구역</span>'}</div></div>
+        <div><label class="lbl">비행 반경</label><select class="field" data-change="radius">${[100,300,500,1000].map(r=>`<option ${w.radius==r?'selected':''} value="${r}">${r}m</option>`).join('')}</select></div>
+        <div><label class="lbl">비행 고도</label><div class="toggle"><button class="${w.alt==='low'?'on':''}" data-act="wiz-set" data-k="alt" data-v="low">150m 미만</button><button class="${w.alt==='high'?'on':''}" data-act="wiz-set" data-k="alt" data-v="high">150m 이상</button></div></div>
+        <div><label class="lbl">비행 시간대</label><div class="toggle"><button class="${w.time==='day'?'on':''}" data-act="wiz-set" data-k="time" data-v="day">주간 (일출~일몰)</button><button class="${w.time==='night'?'on':''}" data-act="wiz-set" data-k="time" data-v="night">야간</button></div></div>
+        <div><label class="lbl">비행 방식</label><div class="toggle"><button class="${w.sight==='vlos'?'on':''}" data-act="wiz-set" data-k="sight" data-v="vlos">가시권 내 (VLOS)</button><button class="${w.sight==='bvlos'?'on':''}" data-act="wiz-set" data-k="sight" data-v="bvlos">가시권 밖 (BVLOS)</button></div></div>
+      </div>
+    </div>`;
+  }
+  return `<div class="wrap" style="max-width:920px">
+    <div class="row between"><h1 style="font-size:24px">비행 규제 진단</h1><span class="cap">${wizSummary(w)}</span></div>
+    ${prog}
+    <section class="card">${body}</section>
+    <div class="row between" style="margin-top:16px">
+      ${w.step>1?`<button class="btn" data-act="wiz-prev">‹ 이전</button>`:`<button class="btn ghost" data-act="wiz-reset">초기화</button>`}
+      ${w.step<3?`<button class="btn primary" data-act="wiz-next">다음 단계 ›</button>`:`<button class="btn primary lg" data-act="wiz-submit">결과 및 공역 분석하기 ›</button>`}
+    </div>
+  </div>`;
+}
+
+/* ---------- RESULT ---------- */
+function Result(){
+  const r=S.result;
+  if(!r) return `<div class="wrap"><div class="card" style="text-align:center"><p>진단 결과가 없습니다.</p><a class="btn primary" href="#/diagnosis">규제 진단 시작하기</a></div></div>`;
+  const L=LV[r.level], w=r.input, d=droneById(w.droneId);
+  return `<div class="wrap" style="max-width:1320px;padding-top:16px">
+    <div class="row between" style="margin-bottom:12px">
+      <a href="#/diagnosis" class="btn sm">‹ 조건 재입력</a>
+      <span class="cap">${S.user?'진단이력 저장됨 ✓':'로그인 시 진단 이력이 저장됩니다'} · ${r.no}</span>
+    </div>
+    <div class="split">
+      ${mapBlock({pin:w.place,radius:w.radius,cls:'res-map',loading:true})}
+      <div class="grid" style="gap:14px">
+        <div class="status ${L.c}">
+          <span class="badge" style="background:rgba(255,255,255,.2);color:#fff">${L.icon} ${L.k}</span>
+          <h2>${L.t} <span style="font-weight:500;font-size:15px">— ${L.d}</span></h2>
+          <div class="meta">📍 ${w.place.name} · 반경 ${w.radius}m<br>🚁 ${d?d.model+' · ':''}${WC[w.wc].label} · ${w.camera?'카메라 탑재':'미탑재'} · ${w.purpose==='biz'?'영리':'취미/레저'}<br>⏱ ${w.alt==='high'?'150m 이상':'150m 미만'} · ${w.time==='night'?'야간':'주간'} · ${w.sight==='bvlos'?'가시권 밖':'가시권 내'}</div>
+        </div>
+        <section class="card">
+          ${r.cards.map((c,i)=>{const cl=c.info?'g':LV[c.lv].c;return `<div class="rc"><div class="ic ${c.info?'':cl}" style="${c.info?'background:var(--sky-50);color:var(--sky)':''}">${c.info?'i':LV[c.lv].icon}</div><div style="flex:1"><div class="cap">${i+1}. ${c.t}</div><h3>${c.h}</h3>${c.l.length?`<ul>${c.l.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}</div></div>`}).join('')}
+        </section>
+        <section class="card">
+          <h3 class="sec-t">필수 준비 서류 체크리스트 <span class="cap">${r.docs.length}건</span></h3>
+          ${r.docs.length?r.docs.map(x=>`<label class="check"><input type="checkbox"> ${x}</label>`).join(''):'<p class="muted" style="margin:6px 0 0">별도로 준비할 민원 서류가 없습니다. 안전수칙을 지켜 비행하세요.</p>'}
+        </section>
+        ${r.apps.length?`<section class="card"><h3 class="sec-t" style="margin-bottom:10px">드론원스톱 민원신청 바로가기</h3><div class="apps">${r.apps.map(a=>`<button class="app-link" data-act="onestop" data-n="${a.n}" data-p="${a.path}"><span>↗ ${a.n}</span><span class="cap">drone.onestop.go.kr</span></button>`).join('')}</div></section>`:''}
+        <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px">
+          <button class="btn dark" data-act="pdf">📄 진단서 PDF</button>
+          <button class="btn primary" data-act="onestop" data-n="${r.apps[0]?.n||'드론원스톱 메인'}" data-p="${r.apps[0]?.path||''}">↗ 드론원스톱 신청</button>
+        </div>
+        <p class="cap">※ 본 결과는 자체 규제 룰셋에 따른 사전 진단 참고 자료이며, 실제 비행 전 드론원스톱 승인을 받아야 합니다.</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- AIRSPACE MAP ---------- */
+function MapPage(){
+  const pin=S.mapPin; const zs=pin?zonesAt(pin.x,pin.y):[];
+  return `<div class="wrap" style="max-width:1320px;padding-top:16px">
+    <div class="split">
+      ${mapBlock({pin,radius:300,cls:'res-map'})}
+      <div class="grid" style="gap:14px">
+        <section class="card">
+          <h1 style="font-size:22px">공역 지도</h1>
+          <p class="muted" style="margin:6px 0 0">지도를 클릭하면 해당 지점의 공역을 판별합니다. 폴리곤을 클릭하면 구역 상세 정보를 볼 수 있습니다.</p>
+        </section>
+        <section class="card">
+          <h3 class="sec-t">선택 지점</h3>
+          ${pin?`<p style="margin:4px 0 10px"><b>${pin.name||'지도 지정 위치'}</b> <span class="cap">(${pin.x}, ${pin.y})</span></p>
+            <div class="grid" style="gap:8px">${zs.length?zs.map(z=>`<div class="row" style="gap:8px"><span class="badge ${ZSTYLE[z.type].badge}">${ZSTYLE[z.type].icon} ${ZSTYLE[z.type].label}</span><b>${z.code}</b><span class="cap">${z.auth}</span></div>`).join(''):'<span class="badge b-green">✓ 일반 구역 — 150m 미만 주간 비행 시 승인 불필요</span>'}</div>
+            <button class="btn primary block" style="margin-top:14px" data-act="map-diag">이 위치로 규제 진단하기 ›</button>`
+            :`<p class="muted" style="margin:4px 0 0">아직 선택한 지점이 없습니다.</p>`}
+        </section>
+        <section class="card">
+          <h3 class="sec-t">현재 뷰포트 공역 (${ZONES.length})</h3>
+          ${ZONES.map(z=>`<div class="rc"><div class="ic ${z.type==='PROHIBITED'?'r':z.type==='RESTRICTED'?'a':''}" style="${z.type==='CONTROL'?'background:var(--sky-50);color:var(--sky)':''}">${ZSTYLE[z.type].icon}</div><div><h3>${z.code} · ${z.name}</h3><div class="cap">${z.alt} · ${z.auth}</div></div></div>`).join('')}
+        </section>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---------- NOTICES & LICENSES ---------- */
+function Notices(){
+  const isLic=route()==='licenses';
+  const tabs=`<div class="tabs"><a href="#/notices" class="${!isLic?'on':''}">드론 공지사항</a><a href="#/licenses" class="${isLic?'on':''}">자격증 가이드</a></div>`;
+  if(!isLic){
+    const cats=['전체','공역고시','법령개정','단속','일반'];
+    const list=NOTICES.map((n,i)=>({...n,i})).filter(n=>(S.ntcCat==='전체'||n.cat===S.ntcCat)&&(!S.ntcQ||(n.title+n.body).includes(S.ntcQ)));
+    return `<div class="wrap" style="max-width:900px">${tabs}
+      <form class="row" data-form="ntc" style="margin:18px 0 10px;flex-wrap:nowrap"><input class="field" name="q" value="${S.ntcQ}" placeholder="검색어 입력: 관제권, 단속 등"><button class="btn">검색</button></form>
+      <div class="chips" style="margin-bottom:16px">${cats.map(c=>`<button class="chip ${S.ntcCat===c?'on':''}" data-act="ntc-cat" data-c="${c}">${c}</button>`).join('')}</div>
+      <div class="grid" style="gap:12px">${list.length?list.map(n=>`<article class="ntc">
+        <button class="ntc-h" data-act="ntc-toggle" data-i="${n.i}"><span class="badge b-gray">${n.cat}</span><h3>${n.title}</h3><div class="row between"><span class="cap">${n.org} · ${n.date} · 조회 ${n.views}</span><span class="cap" style="color:var(--sky);font-weight:600">${S.ntcOpen===n.i?'접기 ▲':'모바일 최적화 본문 ▼'}</span></div></button>
+        ${S.ntcOpen===n.i?`<div class="ntc-b">${n.body}<div class="row between" style="margin-top:12px"><button class="btn sm" data-act="toast" data-m="첨부파일 다운로드 (목업)">📎 첨부파일</button><button class="btn sm" data-act="onestop" data-n="원문 공지" data-p="notice">드론원스톱 원문 보기 ↗</button></div></div>`:''}
+      </article>`).join(''):'<div class="card muted">검색된 공지사항이 없습니다.</div>'}</div>
+    </div>`;
+  }
+  const main=S.user&&S.drones[0]; const mine=main?wcOf(main.mtow):-1;
+  const L=[
+    {t:'면제',s:'250g 이하',li:['학과: 없음','실기: 없음','기체신고: 면제'],a:'—'},
+    {t:'4종',s:'250g 초과 ~ 2kg',li:['학과: 온라인 교육','실기: 면제','비용: 무료'],a:'온라인 교육 신청 ↗'},
+    {t:'3종',s:'2kg 초과 ~ 7kg',li:['학과: 필기시험','비행경력: 6시간','실기: 면제'],a:'시험 일정 보기'},
+    {t:'2종',s:'7kg 초과 ~ 25kg',li:['학과: 필기시험','비행경력: 10시간','실기: 필수'],a:'지정교육기관'},
+    {t:'1종',s:'25kg 초과 ~ 150kg',li:['학과: 필기시험','비행경력: 20시간','실기: 필수'],a:'지정교육기관'},
+  ];
+  return `<div class="wrap">${tabs}
+    ${main?`<div class="card" style="margin-top:18px;background:var(--sky-50);border-color:#BAE6FD">💡 ${S.user.name}님의 대표 기체 <b>${main.model} (${kg(main.mtow)})</b> 기준 필수 자격은 <b style="color:var(--sky)">${WC[mine].lic}</b> 입니다.</div>`:`<div class="notice-empty" style="margin-top:18px">로그인하고 내 드론을 등록하면 필요한 자격 등급이 자동으로 강조됩니다.</div>`}
+    <div class="lic-grid" style="margin-top:16px">${L.map((l,i)=>`<div class="lic ${i===mine?'mine':''}">
+      ${i===mine?'<span class="badge b-blue" style="position:absolute;top:-12px;left:14px;background:var(--sky);color:#fff">★ 내 드론 해당 등급</span>':''}
+      <h3>${l.t}</h3><div class="cap">${l.s}</div><ul>${l.li.map(x=>`<li>${x}</li>`).join('')}</ul>
+      ${l.a!=='—'?`<button class="btn sm block" data-act="toast" data-m="${l.a} (목업)">${l.a}</button>`:''}
+    </div>`).join('')}</div>
+    <section class="card" style="margin-top:16px">
+      <h2 class="sec-t" style="margin-bottom:12px">자격 취득 절차 (3종 기준)</h2>
+      <div class="steps">${['TS 배움터 회원가입 및 응시자격 신청','학과(필기) 시험 응시','비행경력 6시간 이수 (지정 교육기관)','조종자 증명 발급'].map((s,i)=>`<div style="background:var(--bg);border-radius:12px;padding:14px"><div class="step-n">${i+1}</div>${s}</div>`).join('')}</div>
+      <p class="cap" style="margin:12px 0 0">접수처: 한국교통안전공단(TS) · 상설 실기시험장: 화성, 영월, 김천 등 (목업)</p>
+    </section>
+  </div>`;
+}
+
+/* ---------- MY PAGE ---------- */
+function MyPage(){
+  if(!S.user) return Login(true);
+  const hist=S.history.filter(h=>S.histFilter==='ALL'||LV[h.level].k===S.histFilter).sort((a,b)=>b.at-a.at);
+  return `<div class="wrap">
+    <h1 style="font-size:24px">마이페이지</h1><p class="cap" style="margin:4px 0 20px">${S.user.name} · ${S.user.email}</p>
+    <div class="row between" style="margin-bottom:12px"><h2 class="sec-t">내 보유 드론 관리</h2><button class="btn primary sm" data-act="drone-edit" data-id="">+ 새 드론 등록하기</button></div>
+    ${S.drones.length?`<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">${S.drones.map((d,i)=>{const c=WC[wcOf(d.mtow)];return `<div class="card drone">
+      <div class="row between"><h3 style="font-size:17px">🚁 ${d.name}</h3>${i===0?'<span class="badge b-blue">주 기체</span>':''}</div>
+      <dl><dt>모델명</dt><dd>${d.model}</dd><dt>자체 / 최대이륙</dt><dd>${kg(d.empty)} / ${kg(d.mtow)}</dd><dt>카메라</dt><dd>${d.camera?'탑재':'미탑재'}</dd><dt>신고번호</dt><dd>${d.reg||'미대상'}</dd><dt>필수자격</dt><dd style="color:var(--sky)">${c.lic}${wcOf(d.mtow)===4?' + 안전성인증':''}</dd></dl>
+      <div class="row" style="gap:6px;margin-top:auto"><button class="btn sm" data-act="drone-edit" data-id="${d.id}">제원 수정</button><button class="btn sm danger" data-act="drone-del" data-id="${d.id}">삭제</button><button class="btn sm primary" style="margin-left:auto" data-act="drone-diag" data-id="${d.id}">이 기체로 진단 ›</button></div>
+    </div>`}).join('')}</div>`
+    :`<div class="notice-empty">아직 등록된 드론이 없습니다. 내 드론을 등록하면 매번 무게를 입력할 필요 없이 1초 만에 불러올 수 있습니다. <button class="btn sm primary" data-act="drone-edit" data-id="">+ 첫 드론 등록하기</button></div>`}
+
+    <div class="row between" style="margin:32px 0 12px"><h2 class="sec-t">최근 규제 진단 이력 <span class="cap">총 ${S.history.length}건</span></h2>
+      <select class="field" style="width:auto;min-height:38px" data-change="histFilter"><option value="ALL">상태: 전체</option>${LV.map(l=>`<option value="${l.k}" ${S.histFilter===l.k?'selected':''}>${l.k}</option>`).join('')}</select></div>
+    <div class="hist">${hist.map(h=>{const L=LV[h.level],w=h.input;const idx=S.history.indexOf(h);return `<div class="hist-row">
+      <span class="cap" style="font-weight:600">${fmtD(h.at)}</span>
+      <b style="color:var(--navy)">${w.place.name}</b>
+      <span class="cap">${WC[w.wc].label} · ${w.purpose==='biz'?'영리':'취미'}${w.camera?'/촬영':''}${w.time==='night'?' · 야간':''}</span>
+      <span class="badge ${L.b}">${L.icon} ${L.k} ${L.t}</span>
+      <span class="row" style="gap:6px"><button class="btn sm" data-act="hist-pdf" data-i="${idx}">PDF</button><button class="btn sm" data-act="hist-view" data-i="${idx}">결과</button><button class="btn sm" data-act="hist-redo" data-i="${idx}">재진단</button></span>
+    </div>`}).join('')||'<div class="card muted">해당 상태의 이력이 없습니다.</div>'}</div>
+  </div>`;
+}
+
+/* ---------- LOGIN ---------- */
+let signup=false;
+function Login(fromMy){
+  return `<div class="wrap" style="max-width:440px;padding-top:40px">
+    <div class="card">
+      <h1 style="font-size:22px">${signup?'회원가입':'로그인'}</h1>
+      <p class="cap" style="margin:4px 0 18px">${fromMy?'마이페이지는 로그인 후 이용할 수 있습니다. ':''}일반 조종자·사업자 구분 없이 하나의 계정으로 이용합니다.</p>
+      <form data-form="login" class="grid" style="gap:12px" novalidate>
+        ${signup?`<div><label class="lbl">이름</label><input class="field" name="name" placeholder="홍길동"></div>`:''}
+        <div><label class="lbl">이메일</label><input class="field" name="email" type="email" value="22260020@yc.ac.kr"></div>
+        <div><label class="lbl">비밀번호</label><input class="field" name="pw" type="password" value="password"></div>
+        <div id="loginErr"></div>
+        <button class="btn primary block">${signup?'가입하고 시작하기':'로그인'}</button>
+      </form>
+      <p class="cap" style="text-align:center;margin:16px 0 0">${signup?'이미 계정이 있나요?':'처음이신가요?'} <a href="#/login" data-act="auth-toggle">${signup?'로그인':'회원가입'}</a></p>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   MODALS
+   ============================================================ */
+function openLayer(html,cls=''){ $('#layer').innerHTML=`<div class="overlay" data-act="layer-close"><div class="modal ${cls}" role="dialog" aria-modal="true">${html}</div></div>` }
+function closeLayer(){ $('#layer').innerHTML='' }
+
+function reportHTML(r){
+  const w=r.input,d=droneById(w.droneId),L=LV[r.level];
+  const air=r.cards[0], zs=r.zones;
+  return `<div class="a4" id="report">
+    <div style="display:flex;justify-content:space-between"><span>문서번호: ${r.no}</span><span>발급일시: ${fmtDT(r.at)}</span></div>
+    <h1>드론 비행 규제 사전 진단 결과 보고서</h1>
+    <h4>1. 비행 기본 정보 및 기체 제원</h4>
+    <table><tr><td class="k">기체 모델명</td><td>${d?d.model:'직접 입력'}</td><td class="k">최대이륙중량</td><td>${WC[w.wc].label}</td></tr>
+    <tr><td class="k">비행 위치</td><td>${w.place.name}</td><td class="k">고도/시간</td><td>${w.alt==='high'?'150m 이상':'150m 미만'} / ${w.time==='night'?'야간':'주간'}</td></tr>
+    <tr><td class="k">카메라 탑재</td><td>${w.camera?'탑재 (항공촬영)':'미탑재'}</td><td class="k">비행 목적</td><td>${w.purpose==='biz'?'사업용(영리)':'취미/레저'}</td></tr></table>
+    <h4>2. 종합 규제 판별 결과: [ ${L.icon} ${L.t} — ${L.d} ]</h4>
+    <div>- 해당 공역 코드 : ${zs.length?zs.map(z=>z.code+' ('+z.name+')').join(', '):'일반 구역'}</div>
+    ${r.cards.map(c=>`<div>- ${c.t} : ${c.h.replace(/\[필수\] /,'필수 · ')}</div>`).join('')}
+    <h4>3. 드론원스톱 민원 신청 시 필수 첨부 서류 체크리스트</h4>
+    ${r.docs.length?r.docs.map(x=>`<div>☐ ${x}</div>`).join(''):'<div>해당 없음</div>'}
+    <div class="foot">* 본 문서는 드론 비행규제 통합안내 플랫폼(0dev)에서 자동 산출된 사전 진단 참고 자료이며, 실제 비행 전 드론원스톱 승인을 득해야 합니다.</div>
+  </div>`;
+}
+function openPDF(r){
+  openLayer(`<div class="row between" style="margin-bottom:12px"><b style="color:var(--navy)">A4 진단 보고서 미리보기</b><div class="row" style="gap:8px"><button class="btn sm primary" data-act="print">PDF 다운로드</button><button class="btn sm" data-act="layer-x">닫기</button></div></div>${reportHTML(r)}`,'wide');
+}
+function droneForm(d){
+  d=d||{id:'',name:'',model:'',empty:'',mtow:'',camera:true,reg:''};
+  openLayer(`<h2 style="font-size:20px;margin-bottom:16px">${d.id?'드론 제원 수정':'새 드론 등록'}</h2>
+  <form data-form="drone" data-id="${d.id}" class="grid" style="gap:12px">
+    <div><label class="lbl">기체 별칭</label><input class="field" name="name" value="${d.name}" required placeholder="예: 주말 촬영용"></div>
+    <div><label class="lbl">모델명</label><input class="field" name="model" value="${d.model}" required placeholder="예: DJI Mini 4 Pro"></div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;gap:10px"><div><label class="lbl">자체중량 (kg)</label><input class="field" name="empty" type="number" step="0.001" value="${d.empty}" required></div><div><label class="lbl">최대이륙중량 (kg)</label><input class="field" name="mtow" type="number" step="0.001" value="${d.mtow}" required></div></div>
+    <label class="check"><input type="checkbox" name="camera" ${d.camera?'checked':''}> 카메라 탑재</label>
+    <div><label class="lbl">기체 신고번호 (보유 시)</label><input class="field" name="reg" value="${d.reg}"></div>
+    <div class="row" style="justify-content:flex-end"><button type="button" class="btn" data-act="layer-x">취소</button><button class="btn primary">저장</button></div>
+  </form>`);
+}
+
+/* ============================================================
+   CHATBOT (RAG SSE mock)
+   ============================================================ */
+const FAQ=['249g 드론 야간비행 가능한가요?','비행승인은 며칠 전까지 신청해야 하나요?','아파트 단지 내 촬영도 국방부 허가가 필요한가요?'];
+const KB=[
+  {k:['야간','밤','일몰'], a:'네, 기체 무게가 250g 이하(예: 249g)라도 일몰 후부터 일출 전까지의 야간 비행은 원칙적으로 금지되어 있습니다.\n야간에 비행하려면 드론원스톱에서 사전에 특별비행승인을 받아야 하며, 안전성인증서와 비행절차서 등을 첨부해야 합니다.',
+   src:[{t:'항공안전법 제129조 (초경량비행장치 조종자 등의 준수사항)',q:'국토교통부장관이 정하는 바에 따라 특별비행승인을 받은 경우에는 야간 비행 등을 할 수 있다.'},{t:'항공안전법 시행규칙 제310조 (초경량비행장치 조종자의 준수사항)',q:'일몰 후부터 일출 전까지의 야간에 비행하지 아니할 것. 다만, 특별비행승인을 받은 경우는 제외한다.'}]},
+  {k:['며칠','승인','신청'], a:'비행승인은 일반적으로 비행 예정일 기준 최소 3일 전(공휴일 제외)까지 드론원스톱으로 신청하는 것을 권장합니다.\n관제권·비행제한구역은 관할 기관(지방항공청, 수도방위사령부 등) 검토 기간이 있어 여유 있게 신청하세요.',
+   src:[{t:'항공안전법 제127조 (초경량비행장치 비행승인)',q:'초경량비행장치를 사용하여 국토교통부장관이 고시하는 초경량비행장치 비행제한공역에서 비행하려는 사람은 국토교통부장관의 비행승인을 받아야 한다.'},{t:'항공안전법 시행규칙 제308조 (초경량비행장치의 비행승인)',q:'비행승인신청서를 지방항공청장에게 제출하여야 한다.'}]},
+  {k:['촬영','카메라','아파트','사진'], a:'카메라를 탑재해 항공촬영을 하려면 원칙적으로 국방부(관할 부대)의 항공촬영 허가를 받아야 합니다. 아파트 단지 등 일상 공간도 예외가 아니며, 비행승인과는 별개 절차입니다.\n비행 4~7일 전 드론원스톱에서 신청하는 것을 권장합니다.',
+   src:[{t:'보안업무규정 시행규칙 (항공촬영 관련)',q:'항공촬영을 하려는 자는 관할 기관의 사전 허가를 받아야 한다.'}]},
+];
+let chatInit=false;
+function chatAdd(html,who){const b=$('#chatBody');const m=document.createElement('div');m.className='msg '+who;m.innerHTML=html;b.appendChild(m);b.scrollTop=b.scrollHeight;return m}
+function chatOpen(){
+  $('#drawer').classList.add('open');
+  if(!chatInit){chatInit=true;
+    chatAdd('안녕하세요! 항공안전법 및 드론 비행 규정에 대해 무엇이든 물어보세요.','ai');
+    const c=document.createElement('div');c.className='chips';c.innerHTML=FAQ.map(q=>`<button class="chip" data-act="chat-q" data-q="${q}"># ${q}</button>`).join('');$('#chatBody').appendChild(c);
+  }
+  setTimeout(()=>$('#chatInput').focus(),250);
+}
+function ask(q){
+  if(!q.trim())return;
+  chatAdd(q.replace(/</g,'&lt;'),'me');
+  const m=chatAdd('<span class="typing"><span></span><span></span><span></span></span>','ai');
+  const hit=KB.find(k=>k.k.some(x=>q.includes(x)));
+  const ans=hit?hit.a:'질문과 관련된 항공안전법 조항을 찾지 못했습니다. 기체 무게, 비행 장소, 시간대 등을 포함해 다시 질문해 주시면 더 정확히 안내해 드릴게요.';
+  setTimeout(()=>{
+    m.textContent='';let i=0;
+    const t=setInterval(()=>{m.textContent=ans.slice(0,i+=2);$('#chatBody').scrollTop=1e6;
+      if(i>=ans.length){clearInterval(t);m.textContent=ans;
+        if(hit){const s=document.createElement('details');s.className='src';s.innerHTML=`<summary>📚 근거 법령 출처 확인 (${hit.src.length})</summary><div>${hit.src.map(x=>`<b>• ${x.t}</b><q>“${x.q}”</q>`).join('')}<a href="#" data-act="toast" data-m="국가법령정보센터 원문 이동 (목업)">국가법령정보센터 원문 보기 ↗</a></div>`;m.appendChild(s);}
+      }},22);
+  },900);
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+function goDiagnose(){
+  const ov=document.createElement('div');ov.className='overlay';ov.innerHTML='<div class="modal" style="text-align:center;max-width:340px"><div class="spinner"></div><b>입력 조건 및 PostGIS 공역 교차 분석 중...</b><p class="cap">자체 규제 룰셋 적용 중</p></div>';document.body.appendChild(ov);
+  setTimeout(()=>{ov.remove();S.result=diagnose(S.wiz);S.popup=null;if(S.user)S.history.push(S.result);location.hash='#/result';render();scrollTo(0,0)},1100);
+}
+document.addEventListener('click',e=>{
+  // map click (pin / polygon)
+  const svg=e.target.closest('svg[data-map]');
+  if(svg){
+    const p=svgPoint(e); const zEl=e.target.closest('.zone'); const r=route();
+    if(r==='diagnosis'){S.wiz.place={name:'지도 지정 위치',addr:`좌표 (${p.x}, ${p.y})`,x:p.x,y:p.y};render();return}
+    if(zEl){S.popup={id:zEl.dataset.zone,x:p.x,y:p.y}}else S.popup=null;
+    if(r==='map'&&!zEl){S.mapPin={x:p.x,y:p.y,name:'지도 지정 위치'}}
+    render();return;
+  }
+  const el=e.target.closest('[data-act]'); if(!el)return;
+  const a=el.dataset.act, w=S.wiz;
+  switch(a){
+    case 'layer-close': if(e.target===el)closeLayer(); return;
+    case 'layer-x': closeLayer(); break;
+    case 'wiz-new': S.wiz=newWiz({droneId:S.user&&S.drones[0]?.id||null,...(S.drones[0]&&S.user?{wc:wcOf(S.drones[0].mtow),camera:S.drones[0].camera}:{})}); break;
+    case 'wiz-drone': {const d=droneById(el.dataset.id);w.droneId=d?d.id:null;if(d){w.wc=wcOf(d.mtow);w.camera=d.camera;toast(`${d.model} 제원을 불러왔습니다`)}render();break}
+    case 'wiz-set': {const k=el.dataset.k;let v=el.dataset.v;if(k==='wc')v=+v,w.droneId=null;if(k==='camera')v=v==='1';w[k]=v;render();break}
+    case 'wiz-place': w.place={...PLACES[+el.dataset.i]};w.qErr='';render();break;
+    case 'wiz-next': w.step++;render();scrollTo(0,0);break;
+    case 'wiz-prev': w.step--;render();break;
+    case 'wiz-reset': S.wiz=newWiz();render();break;
+    case 'wiz-submit': goDiagnose();break;
+    case 'layer': {const k=el.dataset.k;if(k==='ALL'){const all=Object.values(S.layers).every(Boolean);Object.keys(S.layers).forEach(x=>S.layers[x]=!all)}else S.layers[k]=!S.layers[k];render();break}
+    case 'pop-close': S.popup=null;render();break;
+    case 'zoom': toast('지도 축척 조절 (목업)');break;
+    case 'pdf': openPDF(S.result);break;
+    case 'print': window.print();break;
+    case 'onestop': toast(`↗ 드론원스톱 '${el.dataset.n}' 페이지로 이동 (프로토타입)`);break;
+    case 'map-diag': S.wiz=newWiz({step:1,place:{...S.mapPin,addr:''}});location.hash='#/diagnosis';toast('위치가 입력되었습니다. 기체 정보를 선택하세요');break;
+    case 'ntc-toggle': {const i=+el.dataset.i;S.ntcOpen=S.ntcOpen===i?-1:i;render();break}
+    case 'ntc-go': S.ntcOpen=+el.dataset.i;break;
+    case 'ntc-cat': S.ntcCat=el.dataset.c;render();break;
+    case 'toast': e.preventDefault();toast(el.dataset.m);break;
+    case 'drone-edit': droneForm(droneById(el.dataset.id));break;
+    case 'drone-del': {const d=droneById(el.dataset.id);if(confirm(`'${d.name}' 기체를 삭제할까요?`)){S.drones=S.drones.filter(x=>x!==d);render();toast('삭제되었습니다')}break}
+    case 'drone-diag': {const d=droneById(el.dataset.id);S.wiz=newWiz({droneId:d.id,wc:wcOf(d.mtow),camera:d.camera});location.hash='#/diagnosis';break}
+    case 'hist-pdf': openPDF(S.history[+el.dataset.i]);break;
+    case 'hist-view': S.result=S.history[+el.dataset.i];S.popup=null;location.hash='#/result';break;
+    case 'hist-redo': S.wiz=newWiz({...S.history[+el.dataset.i].input,step:3});location.hash='#/diagnosis';toast('이전 조건을 불러왔습니다');break;
+    case 'logout': S.user=null;location.hash='#/home';render();toast('로그아웃되었습니다');break;
+    case 'auth-toggle': e.preventDefault();signup=!signup;render();break;
+    case 'chat-open': chatOpen();break;
+    case 'chat-close': $('#drawer').classList.remove('open');break;
+    case 'chat-q': ask(el.dataset.q);break;
+  }
+});
+document.addEventListener('change',e=>{
+  const k=e.target.dataset.change;if(!k)return;
+  if(k==='radius'){S.wiz.radius=+e.target.value}
+  if(k==='histFilter'){S.histFilter=e.target.value}
+  render();
+});
+document.addEventListener('submit',e=>{
+  const f=e.target; const kind=f.dataset.form; if(!kind)return; e.preventDefault();
+  const fd=new FormData(f);
+  if(kind==='quick'){const q=(fd.get('q')||'').trim();const p=PLACES.find(p=>q&&(p.name.includes(q)||p.addr.includes(q)||q.includes(p.name.split(' ')[0])));
+    if(!q){location.hash='#/map';return}
+    if(p){S.mapPin={...p};S.popup=null;location.hash='#/map'}else toast('검색된 주소가 없습니다. 지도 위를 직접 클릭해 핀을 지정해주세요.');}
+  if(kind==='wiz-search'){const q=(fd.get('q')||'').trim();S.wiz.q=q;const p=PLACES.find(p=>q&&(p.name.includes(q)||p.addr.includes(q)||p.name.includes(q.replace(/\s/g,''))||q.split(' ').some(t=>t.length>1&&(p.name+p.addr).includes(t))));
+    if(p){S.wiz.place={...p};S.wiz.qErr=''}else S.wiz.qErr='검색된 주소가 없습니다. 도로명 또는 지번 주소를 확인하거나 지도 위를 직접 클릭해 핀을 지정해주세요.';render();}
+  if(kind==='ntc'){S.ntcQ=(fd.get('q')||'').trim();render()}
+  if(kind==='login'){const email=fd.get('email'),pw=fd.get('pw'),name=fd.get('name');
+    if(!/^\S+@\S+\.\S+$/.test(email)||!pw||(signup&&!name)){$('#loginErr').innerHTML='<div class="err">이메일 형식과 필수 입력값을 확인해주세요.</div>';return}
+    S.user={name:signup?name:'김태홍',email};signup=false;location.hash='#/mypage';toast('로그인되었습니다');}
+  if(kind==='drone'){const id=f.dataset.id;const d={id:id||'d'+Date.now(),name:fd.get('name'),model:fd.get('model'),empty:+fd.get('empty'),mtow:+fd.get('mtow'),camera:!!fd.get('camera'),reg:fd.get('reg')};
+    if(!d.name||!d.model||!d.mtow){toast('필수 항목을 입력해주세요');return}
+    if(id)S.drones=S.drones.map(x=>x.id===id?d:x);else S.drones.push(d);closeLayer();render();toast(id?'수정되었습니다':'새 드론이 등록되었습니다');}
+});
+$('#chatForm').addEventListener('submit',e=>{e.preventDefault();const i=$('#chatInput');ask(i.value);i.value=''});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeLayer();$('#drawer').classList.remove('open')}});
+window.addEventListener('hashchange',()=>{S.popup=null;render();scrollTo(0,0)});
+render();
+</script>
+</body>
+</html>
